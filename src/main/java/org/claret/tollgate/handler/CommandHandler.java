@@ -145,7 +145,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
             // Clear the sign text at the sign location
             Block signBlock = found.getSignLocation().getBlock();
-            if (signBlock.getState() instanceof Sign sign) {
+            if (signBlock.getChunk().isLoaded() && signBlock.getState() instanceof Sign sign) {
                 org.bukkit.block.sign.SignSide signSide = sign.getSide(Side.FRONT);
                 signSide.line(0, Component.text(""));
                 signSide.line(1, Component.text(""));
