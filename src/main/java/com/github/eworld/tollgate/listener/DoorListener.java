@@ -13,6 +13,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockRedstoneEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import net.kyori.adventure.text.Component;
 import net.milkbowl.vault.economy.Economy;
@@ -209,6 +210,29 @@ public class DoorListener implements Listener {
         // Notify the player
         Player player = event.getPlayer();
         sendMessage(player, "tollgate-removed", data);
+    }
+
+    /**
+     * Blocks redstone activation of tollgate iron doors.
+     * Pressure plates, buttons, levers, and any other redstone sources
+     * cannot open a door that is registered as a tollgate.
+     *
+     * @param event the block redstone event
+     */
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onRedstone(BlockRedstoneEvent event) {
+        Block block = event.getBlock();
+
+        // Only intercept iron doors
+        if (!TollgateManager.isIronDoor(block)) {
+            return;
+        }
+
+        // If the door is a registered tollgate, cancel redstone activation
+        Location bottomDoorLoc = TollgateManager.getBottomDoorLocation(block);
+        if (plugin.getTollgateManager().getTollgate(bottomDoorLoc) != null) {
+            event.setNewCurrent(event.getOldCurrent());
+        }
     }
 
     /**
