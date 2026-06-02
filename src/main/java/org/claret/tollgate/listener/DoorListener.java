@@ -15,6 +15,9 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockRedstoneEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.Particle;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.claret.tollgate.ConfigManager;
 import org.bukkit.inventory.EquipmentSlot;
 import net.kyori.adventure.text.Component;
 import net.milkbowl.vault.economy.Economy;
@@ -175,6 +178,8 @@ public class DoorListener implements Listener {
             target.setYaw(playerLoc.getYaw());
             target.setPitch(playerLoc.getPitch());
             player.teleport(target);
+
+            spawnPassageParticles(player, doorCenter);
         }
     }
 
@@ -244,6 +249,36 @@ public class DoorListener implements Listener {
         Location bottomDoorLoc = TollgateManager.getBottomDoorLocation(block);
         if (plugin.getTollgateManager().getTollgate(bottomDoorLoc) != null) {
             event.setNewCurrent(event.getOldCurrent());
+        }
+    }
+
+    /**
+     * Spawns a three-wave expanding burst of END_ROD particles at the door center,
+     * visible only to the passing player. Each wave has a progressively larger radius.
+     *
+     * @param player the player who sees the particles
+     * @param center the center of the door block for particle spawning
+     */
+    private void spawnPassageParticles(Player player, Location center) {
+        ConfigManager config = plugin.getConfigManager();
+        if (!config.isParticlesEnabled()) {
+            return;
+        }
+
+        int count = config.getParticleCount();
+        double maxRadius = config.getParticleRadius();
+
+        double[] radii = {maxRadius * 0.25, maxRadius * 0.6, maxRadius};
+        long[] delays = {0L, 3L, 6L};
+
+        for (int i = 0; i < radii.length; i++) {
+            final double radius = radii[i];
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    player.spawnParticle(Particle.END_ROD, center, count, radius, radius, radius, 0);
+                }
+            }.runTaskLater(plugin, delays[i]);
         }
     }
 

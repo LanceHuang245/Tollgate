@@ -17,3 +17,9 @@ messages:
   plugin-reloaded: "&aTollgate 配置已重载。"
   title-cancelled: "&c收费站创建已取消。"
   payment-received: "&a%player% &7通过了你的收费站 &6%title%&7，你收到了 &6%price%&7。总收入: &6%revenue%"
+
+# Particle effects when a player passes through a tollgate (visible to the passing player only)
+particles:
+  enabled: true
+  count: 25
+  radius: 1.2

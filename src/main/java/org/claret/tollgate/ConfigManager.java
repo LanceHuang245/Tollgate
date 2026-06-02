@@ -14,6 +14,9 @@ public class ConfigManager {
     private final TollgatePlugin plugin;
     private String currencySymbol = "$";
     private Map<String, String> messages;
+    private boolean particlesEnabled = true;
+    private int particleCount = 25;
+    private double particleRadius = 1.2;
 
     /**
      * Constructs a new ConfigManager with a reference to the main plugin.
@@ -44,6 +47,10 @@ public class ConfigManager {
                 }
             }
         }
+
+        particlesEnabled = config.getBoolean("particles.enabled", true);
+        particleCount = config.getInt("particles.count", 25);
+        particleRadius = config.getDouble("particles.radius", 1.2);
     }
 
     /**
@@ -85,5 +92,17 @@ public class ConfigManager {
             message = message.replace("%" + entry.getKey() + "%", entry.getValue());
         }
         return message;
+    }
+
+    public boolean isParticlesEnabled() {
+        return particlesEnabled;
+    }
+
+    public int getParticleCount() {
+        return particleCount;
+    }
+
+    public double getParticleRadius() {
+        return particleRadius;
     }
 }
