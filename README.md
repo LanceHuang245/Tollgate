@@ -19,7 +19,10 @@ A Minecraft Paper plugin that adds toll gates to your server. Players place an i
 - Fee deduction via Vault economy — works with EssentialsX, CMI, or any Vault-based economy
 - Automatic tollgate registration when a valid sign is placed above an iron door
 - Automatic deregistration when the sign or door is broken
-- Configurable messages
+- Custom title support via chat input during creation
+- Particle burst effect (END_ROD) on passage, configurable and visible only to the passer
+- Persisted tollgate data survives server restarts, including in multi-world environments
+- Configurable messages and cooldowns
 - Admin commands for management
 
 ## Installation
@@ -65,6 +68,12 @@ currency-symbol: "$"
 
 # Payment cooldown per player (seconds, 0 = disabled)
 cooldown: 0
+
+# Particle effects when a player passes through a tollgate (visible to the passing player only)
+particles:
+  enabled: true
+  count: 25
+  radius: 1.2
 
 messages:
   payment-success: "&aYou paid &6%price% &ato pass through the toll gate."
@@ -152,6 +161,10 @@ The compiled `.jar` will be in `target/`.
     <scope>provided</scope>
 </dependency>
 ```
+
+### Toll Gate Persistence
+
+All tollgate data is saved to `data.yml` and restored on server restart. For worlds that load lazily (e.g., multiverse, BskyBlock, or custom world generators), tollgates are automatically registered when the world becomes available — no manual intervention required.
 
 ## License
 
