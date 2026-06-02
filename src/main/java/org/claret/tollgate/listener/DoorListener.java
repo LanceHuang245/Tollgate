@@ -15,6 +15,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockRedstoneEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import net.kyori.adventure.text.Component;
 import net.milkbowl.vault.economy.Economy;
 import org.claret.tollgate.TollgatePlugin;
@@ -22,6 +23,7 @@ import org.claret.tollgate.TollgateData;
 import org.claret.tollgate.TollgateManager;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * Event listener for iron door interactions in the Tollgate plugin.
@@ -35,6 +37,9 @@ public class DoorListener implements Listener {
     /** Tracks the last payment time per player per tollgate (playerUUID:doorLocation -> epoch millis). */
     private final Map<String, Long> cooldowns;
 
+    /** Suppresses duplicate cooldown messages per player within a short window. */
+    private final Map<UUID, Long> lastCooldownMessage;
+
     /**
      * Constructs a new DoorListener with a reference to the main plugin.
      *
@@ -43,6 +48,7 @@ public class DoorListener implements Listener {
     public DoorListener(TollgatePlugin plugin) {
         this.plugin = plugin;
         this.cooldowns = new HashMap<>();
+        this.lastCooldownMessage = new HashMap<>();
     }
 
     /**
@@ -56,6 +62,11 @@ public class DoorListener implements Listener {
     public void onDoorInteract(PlayerInteractEvent event) {
         // Only handle right-click on blocks
         if (event.getAction() != Action.RIGHT_CLICK_BLOCK) {
+            return;
+        }
+
+        // Only process main hand to avoid duplicate events
+        if (event.getHand() != EquipmentSlot.HAND) {
             return;
         }
 
@@ -93,6 +104,11 @@ public class DoorListener implements Listener {
         String cooldownKey = player.getUniqueId().toString() + ":" + bottomDoorLoc.toString();
         Long lastPayment = cooldowns.get(cooldownKey);
         if (lastPayment != null && System.currentTimeMillis() - lastPayment < 3000L) {
+            Long lastMsg = lastCooldownMessage.get(player.getUniqueId());
+            if (lastMsg != null && System.currentTimeMillis() - lastMsg < 500L) {
+                return;
+            }
+            lastCooldownMessage.put(player.getUniqueId(), System.currentTimeMillis());
             long remainingSeconds = 3 - (System.currentTimeMillis() - lastPayment) / 1000L;
             Map<String, String> cooldownPlaceholders = new HashMap<>();
             cooldownPlaceholders.put("seconds", String.valueOf(remainingSeconds));
