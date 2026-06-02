@@ -1,0 +1,21 @@
+# Currency symbol displayed in messages
+currency-symbol: "$"
+
+# Payment cooldown per player in seconds (0 = disabled)
+cooldown: 0
+
+messages:
+  enter-title: "&a请输入自定义标题"
+  enter-price: "&a请输入收费价格："
+  enter-timeout: "&c收费站创建超时，已取消。"
+  tollgate-created: "&a收费站创建成功！标题: &6%title%&a, 价格: &6%price%"
+  tollgate-create-failed: "&c收费站创建失败！价格必须为正数。"
+  invalid-price: "&c无效的价格，请输入正数。"
+  payment-success: "&a你已支付 &6%price% &a通过收费站。"
+  insufficient-funds: "&c你的余额不足！需要 &6%price%&c，你只有 &6%balance%&c。"
+  cooldown: "&c请等待 &6%seconds% &c秒后再使用此收费站。"
+  tollgate-removed: "&c收费站已被移除。"
+  tollgate-not-found: "&c此处没有收费站。"
+  no-permission: "&c你没有权限使用此命令。"
+  plugin-reloaded: "&aTollgate 配置已重载。"
+  title-cancelled: "&c收费站创建已取消。"
