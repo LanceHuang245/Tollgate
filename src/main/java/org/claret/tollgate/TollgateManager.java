@@ -18,6 +18,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,15 +26,20 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.world.WorldLoadEvent;
+
 /**
  * Core business logic manager for the Tollgate plugin.
  * Manages all toll gate data and operations.
  */
-public class TollgateManager {
+public class TollgateManager implements Listener {
 
     private final TollgatePlugin plugin;
     private final Map<Location, TollgateData> tollgates;
     private final File dataFile;
+    private final List<Map<?, ?>> pendingEntries;
 
     /**
      * Constructs a new TollgateManager with a reference to the main plugin.
@@ -44,6 +50,7 @@ public class TollgateManager {
         this.plugin = plugin;
         this.tollgates = new ConcurrentHashMap<>();
         this.dataFile = new File(plugin.getDataFolder(), "data.yml");
+        this.pendingEntries = new ArrayList<>();
     }
 
     /**
@@ -236,11 +243,18 @@ public class TollgateManager {
         if (!dataFile.exists()) {
             return;
         }
+        pendingEntries.clear();
         FileConfiguration data = YamlConfiguration.loadConfiguration(dataFile);
         List<Map<?, ?>> list = data.getMapList("tollgates");
         for (Map<?, ?> entry : list) {
             World doorWorld = Bukkit.getWorld((String) entry.get("door-world"));
             if (doorWorld == null) {
+                pendingEntries.add(entry);
+                continue;
+            }
+            World signWorld = Bukkit.getWorld((String) entry.get("sign-world"));
+            if (signWorld == null) {
+                pendingEntries.add(entry);
                 continue;
             }
             Location dl = new Location(doorWorld,
@@ -248,10 +262,6 @@ public class TollgateManager {
                     ((Number) entry.get("door-y")).intValue(),
                     ((Number) entry.get("door-z")).intValue());
 
-            World signWorld = Bukkit.getWorld((String) entry.get("sign-world"));
-            if (signWorld == null) {
-                continue;
-            }
             Location sl = new Location(signWorld,
                     ((Number) entry.get("sign-x")).intValue(),
                     ((Number) entry.get("sign-y")).intValue(),
@@ -268,6 +278,64 @@ public class TollgateManager {
             }
             tollgates.put(dl.clone(), td);
         }
+        if (!pendingEntries.isEmpty()) {
+            plugin.getLogger().info("Deferred " + pendingEntries.size() + " tollgate(s) waiting for world load");
+        }
         plugin.getLogger().info("Loaded " + tollgates.size() + " tollgate(s) from data.yml");
+    }
+
+    /**
+     * Handles world load events to register tollgates whose worlds were not
+     * available when loadData() ran during plugin startup.
+     *
+     * @param event the WorldLoadEvent
+     */
+    @EventHandler
+    public void onWorldLoad(WorldLoadEvent event) {
+        World world = event.getWorld();
+        String worldName = world.getName();
+        int loaded = 0;
+        Iterator<Map<?, ?>> iter = pendingEntries.iterator();
+        while (iter.hasNext()) {
+            Map<?, ?> entry = iter.next();
+            String doorWorldName = (String) entry.get("door-world");
+            String signWorldName = (String) entry.get("sign-world");
+            if (!worldName.equals(doorWorldName) && !worldName.equals(signWorldName)) {
+                continue;
+            }
+            World doorWorld = Bukkit.getWorld(doorWorldName);
+            if (doorWorld == null) {
+                continue;
+            }
+            World signWorld = Bukkit.getWorld(signWorldName);
+            if (signWorld == null) {
+                continue;
+            }
+            Location dl = new Location(doorWorld,
+                    ((Number) entry.get("door-x")).intValue(),
+                    ((Number) entry.get("door-y")).intValue(),
+                    ((Number) entry.get("door-z")).intValue());
+
+            Location sl = new Location(signWorld,
+                    ((Number) entry.get("sign-x")).intValue(),
+                    ((Number) entry.get("sign-y")).intValue(),
+                    ((Number) entry.get("sign-z")).intValue());
+
+            UUID owner = UUID.fromString((String) entry.get("owner"));
+            String title = (String) entry.get("title");
+            double price = ((Number) entry.get("price")).doubleValue();
+
+            TollgateData td = new TollgateData(dl, sl, title, price, owner);
+            Number revenue = (Number) entry.get("revenue");
+            if (revenue != null) {
+                td.addRevenue(revenue.doubleValue());
+            }
+            tollgates.put(dl.clone(), td);
+            iter.remove();
+            loaded++;
+        }
+        if (loaded > 0) {
+            plugin.getLogger().info("Loaded " + loaded + " deferred tollgate(s) for world '" + worldName + "'");
+        }
     }
 }

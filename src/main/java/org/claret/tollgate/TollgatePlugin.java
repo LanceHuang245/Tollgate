@@ -55,6 +55,7 @@ public class TollgatePlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new SignListener(this), this);
         getServer().getPluginManager().registerEvents(new DoorListener(this), this);
         getServer().getPluginManager().registerEvents(chatInputHandler, this);
+        getServer().getPluginManager().registerEvents(tollgateManager, this);
 
         CommandHandler commandHandler = new CommandHandler(this);
         getCommand("tollgate").setExecutor(commandHandler);
