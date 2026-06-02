@@ -1,7 +1,7 @@
-package com.github.eworld.tollgate.handler;
+package org.claret.tollgate.handler;
 
-import com.github.eworld.tollgate.TollgateData;
-import com.github.eworld.tollgate.TollgatePlugin;
+import org.claret.tollgate.TollgateData;
+import org.claret.tollgate.TollgatePlugin;
 import org.bukkit.Location;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;

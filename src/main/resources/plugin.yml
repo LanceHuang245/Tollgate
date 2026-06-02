@@ -1,6 +1,6 @@
 name: Tollgate
 version: 1.0.0
-main: com.github.eworld.tollgate.TollgatePlugin
+main: org.claret.tollgate.TollgatePlugin
 api-version: "1.21"
 depend: [Vault]
 softdepend: []

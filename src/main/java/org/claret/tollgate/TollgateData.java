@@ -1,4 +1,4 @@
-package com.github.eworld.tollgate;
+package org.claret.tollgate;
 
 import org.bukkit.Location;
 import java.util.UUID;

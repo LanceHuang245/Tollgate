@@ -1,4 +1,4 @@
-package com.github.eworld.tollgate.handler;
+package org.claret.tollgate.handler;
 
 import net.kyori.adventure.text.Component;
 import org.bukkit.ChatColor;
@@ -14,9 +14,9 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.bukkit.OfflinePlayer;
 
-import com.github.eworld.tollgate.TollgatePlugin;
-import com.github.eworld.tollgate.TollgateData;
-import com.github.eworld.tollgate.TollgateManager;
+import org.claret.tollgate.TollgatePlugin;
+import org.claret.tollgate.TollgateData;
+import org.claret.tollgate.TollgateManager;
 
 import java.util.Arrays;
 import java.util.Collection;

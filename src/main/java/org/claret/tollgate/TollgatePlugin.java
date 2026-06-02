@@ -1,13 +1,13 @@
-package com.github.eworld.tollgate;
+package org.claret.tollgate;
 
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.github.eworld.tollgate.handler.ChatInputHandler;
-import com.github.eworld.tollgate.handler.CommandHandler;
-import com.github.eworld.tollgate.listener.SignListener;
-import com.github.eworld.tollgate.listener.DoorListener;
+import org.claret.tollgate.handler.ChatInputHandler;
+import org.claret.tollgate.handler.CommandHandler;
+import org.claret.tollgate.listener.SignListener;
+import org.claret.tollgate.listener.DoorListener;
 
 /** Main plugin class for the Tollgate Paper plugin. */
 public class TollgatePlugin extends JavaPlugin {

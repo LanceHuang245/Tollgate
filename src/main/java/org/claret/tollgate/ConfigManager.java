@@ -1,4 +1,4 @@
-package com.github.eworld.tollgate;
+package org.claret.tollgate;
 
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;

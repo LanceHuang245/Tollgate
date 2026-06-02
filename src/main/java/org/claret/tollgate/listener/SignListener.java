@@ -1,8 +1,8 @@
-package com.github.eworld.tollgate.listener;
+package org.claret.tollgate.listener;
 
-import com.github.eworld.tollgate.TollgateData;
-import com.github.eworld.tollgate.TollgateManager;
-import com.github.eworld.tollgate.TollgatePlugin;
+import org.claret.tollgate.TollgateData;
+import org.claret.tollgate.TollgateManager;
+import org.claret.tollgate.TollgatePlugin;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;

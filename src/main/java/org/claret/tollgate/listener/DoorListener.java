@@ -1,4 +1,4 @@
-package com.github.eworld.tollgate.listener;
+package org.claret.tollgate.listener;
 
 import org.bukkit.Location;
 import org.bukkit.util.Vector;
@@ -17,9 +17,9 @@ import org.bukkit.event.block.BlockRedstoneEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import net.kyori.adventure.text.Component;
 import net.milkbowl.vault.economy.Economy;
-import com.github.eworld.tollgate.TollgatePlugin;
-import com.github.eworld.tollgate.TollgateData;
-import com.github.eworld.tollgate.TollgateManager;
+import org.claret.tollgate.TollgatePlugin;
+import org.claret.tollgate.TollgateData;
+import org.claret.tollgate.TollgateManager;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
