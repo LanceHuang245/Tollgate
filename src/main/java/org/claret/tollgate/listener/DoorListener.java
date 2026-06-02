@@ -103,20 +103,24 @@ public class DoorListener implements Listener {
 
         Player player = event.getPlayer();
 
-        // Check per-tollgate cooldown (same player + same door = 3 seconds)
-        String cooldownKey = player.getUniqueId().toString() + ":" + bottomDoorLoc.toString();
-        Long lastPayment = cooldowns.get(cooldownKey);
-        if (lastPayment != null && System.currentTimeMillis() - lastPayment < 3000L) {
-            Long lastMsg = lastCooldownMessage.get(player.getUniqueId());
-            if (lastMsg != null && System.currentTimeMillis() - lastMsg < 500L) {
+        // Check per-tollgate cooldown (configurable, 0 = disabled)
+        int cooldownSeconds = plugin.getConfigManager().getCooldownSeconds();
+        if (cooldownSeconds > 0) {
+            String cooldownKey = player.getUniqueId().toString() + ":" + bottomDoorLoc.toString();
+            Long lastPayment = cooldowns.get(cooldownKey);
+            long cooldownMillis = cooldownSeconds * 1000L;
+            if (lastPayment != null && System.currentTimeMillis() - lastPayment < cooldownMillis) {
+                Long lastMsg = lastCooldownMessage.get(player.getUniqueId());
+                if (lastMsg != null && System.currentTimeMillis() - lastMsg < 500L) {
+                    return;
+                }
+                lastCooldownMessage.put(player.getUniqueId(), System.currentTimeMillis());
+                long remainingSeconds = cooldownSeconds - (System.currentTimeMillis() - lastPayment) / 1000L;
+                Map<String, String> cooldownPlaceholders = new HashMap<>();
+                cooldownPlaceholders.put("seconds", String.valueOf(remainingSeconds));
+                player.sendMessage(plugin.getConfigManager().getMessage("cooldown", cooldownPlaceholders));
                 return;
             }
-            lastCooldownMessage.put(player.getUniqueId(), System.currentTimeMillis());
-            long remainingSeconds = 3 - (System.currentTimeMillis() - lastPayment) / 1000L;
-            Map<String, String> cooldownPlaceholders = new HashMap<>();
-            cooldownPlaceholders.put("seconds", String.valueOf(remainingSeconds));
-            player.sendMessage(plugin.getConfigManager().getMessage("cooldown", cooldownPlaceholders));
-            return;
         }
 
         Economy economy = plugin.getEconomy();
@@ -150,8 +154,11 @@ public class DoorListener implements Listener {
             ownerPlayer.sendMessage(plugin.getConfigManager().getMessage("payment-received", ownerPlaceholders));
         }
 
-        // Record the cooldown timestamp
-        cooldowns.put(cooldownKey, System.currentTimeMillis());
+        // Record the cooldown timestamp if cooldown is enabled
+        if (cooldownSeconds > 0) {
+            String cooldownKey = player.getUniqueId().toString() + ":" + bottomDoorLoc.toString();
+            cooldowns.put(cooldownKey, System.currentTimeMillis());
+        }
 
         // Send success message
         sendMessage(player, "payment-success", data);
@@ -214,7 +221,7 @@ public class DoorListener implements Listener {
         // Clear the sign associated with this tollgate
         Location signLoc = data.getSignLocation();
         Block signBlock = signLoc.getBlock();
-        if (signBlock.getState() instanceof Sign) {
+        if (signBlock.getChunk().isLoaded() && signBlock.getState() instanceof Sign) {
             Sign sign = (Sign) signBlock.getState();
             org.bukkit.block.sign.SignSide side = sign.getSide(Side.FRONT);
             side.line(0, Component.empty());
