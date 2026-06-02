@@ -8,6 +8,8 @@ import org.bukkit.block.data.Bisected;
 import org.bukkit.block.data.type.WallSign;
 import org.bukkit.block.sign.Side;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import java.util.Collection;
 import java.util.Map;
 import java.util.UUID;
@@ -157,7 +159,7 @@ public class TollgateManager {
     public void updateSignDisplay(Sign sign, TollgateData data) {
         // Update sign text with tollgate information using the Component API
         org.bukkit.block.sign.SignSide side = sign.getSide(Side.FRONT);
-        side.line(0, Component.text("[Tollgate]"));
+        side.line(0, Component.text("[Tollgate]", NamedTextColor.RED, TextDecoration.BOLD));
         side.line(1, Component.text(data.getTitle()));
         side.line(2, Component.text(String.valueOf(data.getPrice())));
         side.line(3, Component.text("潜行+右键铁门"));
