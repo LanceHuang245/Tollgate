@@ -18,6 +18,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -50,7 +51,7 @@ public class TollgateManager implements Listener {
         this.plugin = plugin;
         this.tollgates = new ConcurrentHashMap<>();
         this.dataFile = new File(plugin.getDataFolder(), "data.yml");
-        this.pendingEntries = new ArrayList<>();
+        this.pendingEntries = Collections.synchronizedList(new ArrayList<>());
     }
 
     /**
@@ -257,31 +258,43 @@ public class TollgateManager implements Listener {
                 pendingEntries.add(entry);
                 continue;
             }
-            Location dl = new Location(doorWorld,
-                    ((Number) entry.get("door-x")).intValue(),
-                    ((Number) entry.get("door-y")).intValue(),
-                    ((Number) entry.get("door-z")).intValue());
-
-            Location sl = new Location(signWorld,
-                    ((Number) entry.get("sign-x")).intValue(),
-                    ((Number) entry.get("sign-y")).intValue(),
-                    ((Number) entry.get("sign-z")).intValue());
-
-            UUID owner = UUID.fromString((String) entry.get("owner"));
-            String title = (String) entry.get("title");
-            double price = ((Number) entry.get("price")).doubleValue();
-
-            TollgateData td = new TollgateData(dl, sl, title, price, owner);
-            Number revenue = (Number) entry.get("revenue");
-            if (revenue != null) {
-                td.addRevenue(revenue.doubleValue());
-            }
-            tollgates.put(dl.clone(), td);
+            registerFromEntry(entry, doorWorld, signWorld);
         }
         if (!pendingEntries.isEmpty()) {
             plugin.getLogger().info("Deferred " + pendingEntries.size() + " tollgate(s) waiting for world load");
         }
         plugin.getLogger().info("Loaded " + tollgates.size() + " tollgate(s) from data.yml");
+    }
+
+    /**
+     * Builds a TollgateData instance from a serialized map entry and resolved worlds,
+     * restores any saved revenue, and registers it in the tollgates map.
+     *
+     * @param entry     the serialized map entry from data.yml
+     * @param doorWorld the resolved door world
+     * @param signWorld the resolved sign world
+     */
+    private void registerFromEntry(Map<?, ?> entry, World doorWorld, World signWorld) {
+        Location dl = new Location(doorWorld,
+                ((Number) entry.get("door-x")).intValue(),
+                ((Number) entry.get("door-y")).intValue(),
+                ((Number) entry.get("door-z")).intValue());
+
+        Location sl = new Location(signWorld,
+                ((Number) entry.get("sign-x")).intValue(),
+                ((Number) entry.get("sign-y")).intValue(),
+                ((Number) entry.get("sign-z")).intValue());
+
+        UUID owner = UUID.fromString((String) entry.get("owner"));
+        String title = (String) entry.get("title");
+        double price = ((Number) entry.get("price")).doubleValue();
+
+        TollgateData td = new TollgateData(dl, sl, title, price, owner);
+        Number revenue = (Number) entry.get("revenue");
+        if (revenue != null) {
+            td.addRevenue(revenue.doubleValue());
+        }
+        tollgates.put(dl.clone(), td);
     }
 
     /**
@@ -311,26 +324,7 @@ public class TollgateManager implements Listener {
             if (signWorld == null) {
                 continue;
             }
-            Location dl = new Location(doorWorld,
-                    ((Number) entry.get("door-x")).intValue(),
-                    ((Number) entry.get("door-y")).intValue(),
-                    ((Number) entry.get("door-z")).intValue());
-
-            Location sl = new Location(signWorld,
-                    ((Number) entry.get("sign-x")).intValue(),
-                    ((Number) entry.get("sign-y")).intValue(),
-                    ((Number) entry.get("sign-z")).intValue());
-
-            UUID owner = UUID.fromString((String) entry.get("owner"));
-            String title = (String) entry.get("title");
-            double price = ((Number) entry.get("price")).doubleValue();
-
-            TollgateData td = new TollgateData(dl, sl, title, price, owner);
-            Number revenue = (Number) entry.get("revenue");
-            if (revenue != null) {
-                td.addRevenue(revenue.doubleValue());
-            }
-            tollgates.put(dl.clone(), td);
+            registerFromEntry(entry, doorWorld, signWorld);
             iter.remove();
             loaded++;
         }
