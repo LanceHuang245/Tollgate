@@ -92,6 +92,17 @@ public class DoorListener implements Listener {
         // Resolve the bottom half location for consistent lookup
         Location bottomDoorLoc = TollgateManager.getBottomDoorLocation(clickedBlock);
 
+        // Enforce maximum interaction distance of 2 blocks (horizontal + vertical)
+        Player player = event.getPlayer();
+        Location doorCenter = bottomDoorLoc.clone().add(0.5, 0, 0.5);
+        Location playerLoc = player.getLocation();
+        double hDist = Math.sqrt(
+                Math.pow(playerLoc.getX() - doorCenter.getX(), 2) +
+                Math.pow(playerLoc.getZ() - doorCenter.getZ(), 2));
+        if (hDist > 2.0 || Math.abs(playerLoc.getY() - doorCenter.getY()) > 2.0) {
+            return;
+        }
+
         // Look up the tollgate data for this door
         TollgateData data = plugin.getTollgateManager().getTollgate(bottomDoorLoc);
         if (data == null) {
@@ -100,8 +111,6 @@ public class DoorListener implements Listener {
 
         // Cancel vanilla interaction to prevent any unintended behavior
         event.setCancelled(true);
-
-        Player player = event.getPlayer();
 
         // Check per-tollgate cooldown (configurable, 0 = disabled)
         int cooldownSeconds = plugin.getConfigManager().getCooldownSeconds();
@@ -170,8 +179,6 @@ public class DoorListener implements Listener {
         if (doorBlock.getBlockData() instanceof Directional) {
             Directional directional = (Directional) doorBlock.getBlockData();
             Vector doorFacing = directional.getFacing().getDirection();
-            Location doorCenter = bottomDoorLoc.clone().add(0.5, 0, 0.5);
-            Location playerLoc = player.getLocation();
 
             Vector toPlayer = playerLoc.toVector().subtract(doorCenter.toVector());
             Vector teleportDir;
