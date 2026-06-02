@@ -48,6 +48,7 @@ public class TollgatePlugin extends JavaPlugin {
         }
 
         tollgateManager = new TollgateManager(this);
+        tollgateManager.loadData();
 
         chatInputHandler = new ChatInputHandler(this);
 
@@ -67,6 +68,7 @@ public class TollgatePlugin extends JavaPlugin {
      */
     @Override
     public void onDisable() {
+        tollgateManager.saveData();
         getLogger().info("Tollgate plugin disabled!");
     }
 

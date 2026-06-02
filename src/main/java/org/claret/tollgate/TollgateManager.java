@@ -1,19 +1,29 @@
 package org.claret.tollgate;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.block.data.Bisected;
 import org.bukkit.block.data.type.WallSign;
 import org.bukkit.block.sign.Side;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
 
 /**
  * Core business logic manager for the Tollgate plugin.
@@ -23,6 +33,7 @@ public class TollgateManager {
 
     private final TollgatePlugin plugin;
     private final Map<Location, TollgateData> tollgates;
+    private final File dataFile;
 
     /**
      * Constructs a new TollgateManager with a reference to the main plugin.
@@ -32,6 +43,7 @@ public class TollgateManager {
     public TollgateManager(TollgatePlugin plugin) {
         this.plugin = plugin;
         this.tollgates = new ConcurrentHashMap<>();
+        this.dataFile = new File(plugin.getDataFolder(), "data.yml");
     }
 
     /**
@@ -48,6 +60,7 @@ public class TollgateManager {
     public TollgateData registerTollgate(Location doorLocation, Location signLocation, String title, double price, UUID ownerUuid) {
         TollgateData data = new TollgateData(doorLocation, signLocation, title, price, ownerUuid);
         tollgates.put(doorLocation.clone(), data);
+        saveData();
         return data;
     }
 
@@ -59,6 +72,7 @@ public class TollgateManager {
     public void unregisterTollgate(Location doorLocation) {
         // Remove the tollgate entry from the map
         tollgates.remove(doorLocation);
+        saveData();
     }
 
     /**
@@ -180,5 +194,80 @@ public class TollgateManager {
             return (Sign) block.getState();
         }
         return null;
+    }
+
+    /**
+     * Persists all tollgate data to data.yml in the plugin data folder.
+     */
+    public void saveData() {
+        FileConfiguration data = new YamlConfiguration();
+        List<Map<String, Object>> list = new ArrayList<>();
+        for (TollgateData td : tollgates.values()) {
+            Map<String, Object> entry = new LinkedHashMap<>();
+            Location dl = td.getDoorLocation();
+            Location sl = td.getSignLocation();
+            entry.put("door-world", dl.getWorld().getName());
+            entry.put("door-x", dl.getBlockX());
+            entry.put("door-y", dl.getBlockY());
+            entry.put("door-z", dl.getBlockZ());
+            entry.put("sign-world", sl.getWorld().getName());
+            entry.put("sign-x", sl.getBlockX());
+            entry.put("sign-y", sl.getBlockY());
+            entry.put("sign-z", sl.getBlockZ());
+            entry.put("owner", td.getOwnerUuid().toString());
+            entry.put("title", td.getTitle());
+            entry.put("price", td.getPrice());
+            entry.put("revenue", td.getTotalRevenue());
+            list.add(entry);
+        }
+        data.set("tollgates", list);
+        try {
+            data.save(dataFile);
+        } catch (IOException e) {
+            plugin.getLogger().log(Level.SEVERE, "Failed to save tollgate data", e);
+        }
+    }
+
+    /**
+     * Loads tollgate data from data.yml in the plugin data folder.
+     * Restores all previously saved tollgates into memory.
+     */
+    public void loadData() {
+        if (!dataFile.exists()) {
+            return;
+        }
+        FileConfiguration data = YamlConfiguration.loadConfiguration(dataFile);
+        List<Map<?, ?>> list = data.getMapList("tollgates");
+        for (Map<?, ?> entry : list) {
+            World doorWorld = Bukkit.getWorld((String) entry.get("door-world"));
+            if (doorWorld == null) {
+                continue;
+            }
+            Location dl = new Location(doorWorld,
+                    ((Number) entry.get("door-x")).intValue(),
+                    ((Number) entry.get("door-y")).intValue(),
+                    ((Number) entry.get("door-z")).intValue());
+
+            World signWorld = Bukkit.getWorld((String) entry.get("sign-world"));
+            if (signWorld == null) {
+                continue;
+            }
+            Location sl = new Location(signWorld,
+                    ((Number) entry.get("sign-x")).intValue(),
+                    ((Number) entry.get("sign-y")).intValue(),
+                    ((Number) entry.get("sign-z")).intValue());
+
+            UUID owner = UUID.fromString((String) entry.get("owner"));
+            String title = (String) entry.get("title");
+            double price = ((Number) entry.get("price")).doubleValue();
+
+            TollgateData td = new TollgateData(dl, sl, title, price, owner);
+            Number revenue = (Number) entry.get("revenue");
+            if (revenue != null) {
+                td.addRevenue(revenue.doubleValue());
+            }
+            tollgates.put(dl.clone(), td);
+        }
+        plugin.getLogger().info("Loaded " + tollgates.size() + " tollgate(s) from data.yml");
     }
 }
