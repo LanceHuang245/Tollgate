@@ -17,6 +17,7 @@ public class ConfigManager {
     private boolean particlesEnabled = true;
     private int particleCount = 25;
     private double particleRadius = 1.2;
+    private int cooldownSeconds = 3;
 
     /**
      * Constructs a new ConfigManager with a reference to the main plugin.
@@ -37,6 +38,7 @@ public class ConfigManager {
         FileConfiguration config = plugin.getConfig();
 
         currencySymbol = config.getString("currency-symbol", "$");
+        cooldownSeconds = config.getInt("cooldown", 3);
 
         messages.clear();
         if (config.isConfigurationSection("messages")) {
@@ -104,5 +106,14 @@ public class ConfigManager {
 
     public double getParticleRadius() {
         return particleRadius;
+    }
+
+    /**
+     * Returns the cooldown duration in seconds between tollgate uses.
+     *
+     * @return the cooldown in seconds, 0 means disabled
+     */
+    public int getCooldownSeconds() {
+        return cooldownSeconds;
     }
 }

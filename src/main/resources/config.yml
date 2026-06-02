@@ -1,6 +1,9 @@
 # Currency symbol displayed in messages
 currency-symbol: "$"
 
+# Payment cooldown per tollgate per player (seconds, 0 = disabled)
+cooldown: 3
+
 messages:
   enter-title: "&a请输入自定义标题"
   enter-price: "&a请输入收费价格："
