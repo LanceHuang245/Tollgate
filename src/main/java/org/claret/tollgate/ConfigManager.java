@@ -6,14 +6,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Manages plugin configuration including currency symbol, cooldown, and
+ * Manages plugin configuration including currency symbol and
  * message templates with placeholder support.
  */
 public class ConfigManager {
 
     private final TollgatePlugin plugin;
     private String currencySymbol = "$";
-    private int cooldown = 0;
     private Map<String, String> messages;
 
     /**
@@ -35,7 +34,6 @@ public class ConfigManager {
         FileConfiguration config = plugin.getConfig();
 
         currencySymbol = config.getString("currency-symbol", "$");
-        cooldown = config.getInt("cooldown", 0);
 
         messages.clear();
         if (config.isConfigurationSection("messages")) {
@@ -55,15 +53,6 @@ public class ConfigManager {
      */
     public String getCurrencySymbol() {
         return currencySymbol;
-    }
-
-    /**
-     * Returns the cooldown duration in seconds between toll gate uses.
-     *
-     * @return the cooldown in seconds
-     */
-    public int getCooldown() {
-        return cooldown;
     }
 
     /**

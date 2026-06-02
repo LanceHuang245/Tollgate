@@ -22,7 +22,6 @@ import org.claret.tollgate.TollgateData;
 import org.claret.tollgate.TollgateManager;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 /**
  * Event listener for iron door interactions in the Tollgate plugin.
@@ -33,8 +32,8 @@ public class DoorListener implements Listener {
     /** Reference to the main plugin instance. */
     private final TollgatePlugin plugin;
 
-    /** Tracks the last payment time per player (UUID -> epoch millis). */
-    private final Map<UUID, Long> cooldowns;
+    /** Tracks the last payment time per player per tollgate (playerUUID:doorLocation -> epoch millis). */
+    private final Map<String, Long> cooldowns;
 
     /**
      * Constructs a new DoorListener with a reference to the main plugin.
@@ -90,18 +89,15 @@ public class DoorListener implements Listener {
 
         Player player = event.getPlayer();
 
-        // Check payment cooldown
-        int cooldownSeconds = plugin.getConfigManager().getCooldown();
-        if (cooldownSeconds > 0) {
-            Long lastPayment = cooldowns.get(player.getUniqueId());
-            if (lastPayment != null && System.currentTimeMillis() - lastPayment < cooldownSeconds * 1000L) {
-                // Calculate remaining cooldown seconds and send cooldown message
-                long remainingSeconds = cooldownSeconds - (System.currentTimeMillis() - lastPayment) / 1000L;
-                Map<String, String> cooldownPlaceholders = new HashMap<>();
-                cooldownPlaceholders.put("seconds", String.valueOf(remainingSeconds));
-                player.sendMessage(plugin.getConfigManager().getMessage("cooldown", cooldownPlaceholders));
-                return;
-            }
+        // Check per-tollgate cooldown (same player + same door = 3 seconds)
+        String cooldownKey = player.getUniqueId().toString() + ":" + bottomDoorLoc.toString();
+        Long lastPayment = cooldowns.get(cooldownKey);
+        if (lastPayment != null && System.currentTimeMillis() - lastPayment < 3000L) {
+            long remainingSeconds = 3 - (System.currentTimeMillis() - lastPayment) / 1000L;
+            Map<String, String> cooldownPlaceholders = new HashMap<>();
+            cooldownPlaceholders.put("seconds", String.valueOf(remainingSeconds));
+            player.sendMessage(plugin.getConfigManager().getMessage("cooldown", cooldownPlaceholders));
+            return;
         }
 
         Economy economy = plugin.getEconomy();
@@ -136,7 +132,7 @@ public class DoorListener implements Listener {
         }
 
         // Record the cooldown timestamp
-        cooldowns.put(player.getUniqueId(), System.currentTimeMillis());
+        cooldowns.put(cooldownKey, System.currentTimeMillis());
 
         // Send success message
         sendMessage(player, "payment-success", data);

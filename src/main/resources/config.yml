@@ -1,9 +1,6 @@
 # Currency symbol displayed in messages
 currency-symbol: "$"
 
-# Payment cooldown per player in seconds (0 = disabled)
-cooldown: 0
-
 messages:
   enter-title: "&a请输入自定义标题"
   enter-price: "&a请输入收费价格："
