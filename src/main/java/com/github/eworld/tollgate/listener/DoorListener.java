@@ -7,6 +7,7 @@ import org.bukkit.block.Sign;
 import org.bukkit.block.data.Directional;
 import org.bukkit.block.sign.Side;
 import org.bukkit.entity.Player;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -114,8 +115,24 @@ public class DoorListener implements Listener {
             return;
         }
 
-        // Withdraw the toll payment
+        // Withdraw the toll payment from the passer
         economy.withdrawPlayer(player, price);
+
+        // Deposit the toll payment to the tollgate owner
+        OfflinePlayer owner = plugin.getServer().getOfflinePlayer(data.getOwnerUuid());
+        economy.depositPlayer(owner, price);
+        data.addRevenue(price);
+
+        // Notify the owner if they are online
+        Player ownerPlayer = owner.getPlayer();
+        if (ownerPlayer != null && ownerPlayer.isOnline()) {
+            Map<String, String> ownerPlaceholders = new HashMap<>();
+            ownerPlaceholders.put("player", player.getName());
+            ownerPlaceholders.put("title", data.getTitle());
+            ownerPlaceholders.put("price", economy.format(price));
+            ownerPlaceholders.put("revenue", economy.format(data.getTotalRevenue()));
+            ownerPlayer.sendMessage(plugin.getConfigManager().getMessage("payment-received", ownerPlaceholders));
+        }
 
         // Record the cooldown timestamp
         cooldowns.put(player.getUniqueId(), System.currentTimeMillis());

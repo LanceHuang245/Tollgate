@@ -10,6 +10,7 @@ import org.bukkit.block.sign.Side;
 import net.kyori.adventure.text.Component;
 import java.util.Collection;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -33,17 +34,17 @@ public class TollgateManager {
 
     /**
      * Registers a new toll gate at the given door location with the specified
-     * sign location, title, and price.
+     * sign location, title, price, and owner.
      *
      * @param doorLocation the location of the bottom half of the iron door
      * @param signLocation the location of the sign block above the door
      * @param title        the custom title for the toll gate
      * @param price        the toll price
+     * @param ownerUuid    the UUID of the player who created this tollgate
      * @return the newly created TollgateData instance
      */
-    public TollgateData registerTollgate(Location doorLocation, Location signLocation, String title, double price) {
-        // Create a new TollgateData and store it keyed by a clone of the door location
-        TollgateData data = new TollgateData(doorLocation, signLocation, title, price);
+    public TollgateData registerTollgate(Location doorLocation, Location signLocation, String title, double price, UUID ownerUuid) {
+        TollgateData data = new TollgateData(doorLocation, signLocation, title, price, ownerUuid);
         tollgates.put(doorLocation.clone(), data);
         return data;
     }

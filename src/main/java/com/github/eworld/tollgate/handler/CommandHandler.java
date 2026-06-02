@@ -12,6 +12,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
+import org.bukkit.OfflinePlayer;
 
 import com.github.eworld.tollgate.TollgatePlugin;
 import com.github.eworld.tollgate.TollgateData;
@@ -20,6 +21,7 @@ import com.github.eworld.tollgate.TollgateManager;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -83,9 +85,14 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         int index = 1;
         for (TollgateData data : tollgates) {
             String price = plugin.getEconomy().format(data.getPrice());
+            String revenue = plugin.getEconomy().format(data.getTotalRevenue());
             String location = formatLocation(data.getDoorLocation());
-            String line = String.format("&e[%d] &f%s &7at &f%s &7- &6%s",
-                    index, data.getTitle(), location, price);
+            String ownerName = plugin.getServer().getOfflinePlayer(data.getOwnerUuid()).getName();
+            if (ownerName == null) {
+                ownerName = data.getOwnerUuid().toString().substring(0, 8);
+            }
+            String line = String.format("&e[%d] &f%s &7at &f%s &7- &6%s &7(owner: &f%s&7, earned: &6%s&7)",
+                    index, data.getTitle(), location, price, ownerName, revenue);
             sender.sendMessage(ChatColor.translateAlternateColorCodes('&', line));
             index++;
         }

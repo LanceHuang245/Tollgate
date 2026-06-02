@@ -141,7 +141,8 @@ public class ChatInputHandler implements Listener {
                             pending.doorLocation.clone(),
                             pending.signLocation.clone(),
                             pending.title,
-                            price);
+                            price,
+                            player.getUniqueId());
 
                     Sign sign = plugin.getTollgateManager().getSignAt(pending.signLocation);
                     if (sign != null) {
