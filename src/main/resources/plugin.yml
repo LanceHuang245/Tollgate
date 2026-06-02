@@ -1,0 +1,22 @@
+name: Tollgate
+version: 1.0.0
+main: com.github.eworld.tollgate.TollgatePlugin
+api-version: "1.21"
+depend: [Vault]
+softdepend: []
+author: eworld
+description: A toll gate plugin for Paper servers - iron doors with signs above become toll gates
+
+commands:
+  tollgate:
+    description: Tollgate admin commands
+    usage: "/tollgate <reload|list|remove>"
+    permission: tollgate.admin
+
+permissions:
+  tollgate.admin:
+    description: Access to tollgate admin commands
+    default: op
+  tollgate.use:
+    description: Allow using toll gates
+    default: true
