@@ -1,8 +1,10 @@
 package org.claret.tollgate.handler;
 
 import org.claret.tollgate.TollgateData;
+import org.claret.tollgate.TollgateManager;
 import org.claret.tollgate.TollgatePlugin;
 import org.bukkit.Location;
+import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -137,6 +139,19 @@ public class ChatInputHandler implements Listener {
 
                 // Register tollgate and update sign on the main server thread
                 plugin.getServer().getScheduler().runTask(plugin, () -> {
+                    // Verify iron door and sign still exist before registering
+                    Block doorBlock = pending.doorLocation.getBlock();
+                    if (!TollgateManager.isIronDoor(doorBlock)) {
+                        player.sendMessage(plugin.getConfigManager().getMessage("tollgate-invalid-door"));
+                        return;
+                    }
+
+                    Block signBlock = pending.signLocation.getBlock();
+                    if (!(signBlock.getState() instanceof Sign)) {
+                        player.sendMessage(plugin.getConfigManager().getMessage("tollgate-invalid-sign"));
+                        return;
+                    }
+
                     TollgateData data = plugin.getTollgateManager().registerTollgate(
                             pending.doorLocation.clone(),
                             pending.signLocation.clone(),
