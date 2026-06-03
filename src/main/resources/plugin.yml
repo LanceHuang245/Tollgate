@@ -10,8 +10,7 @@ description: A toll gate plugin for Paper servers - iron doors with signs above 
 commands:
   tollgate:
     description: Tollgate admin commands
-    usage: "/tollgate <reload|list|remove>"
-    permission: tollgate.admin
+    usage: "/tollgate <help|list|reload|remove>"
 
 permissions:
   tollgate.admin:

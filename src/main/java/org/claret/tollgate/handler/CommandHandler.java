@@ -40,13 +40,12 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      */
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (!sender.hasPermission("tollgate.admin")) {
-            sendMessage(sender, "no-permission");
-            return true;
+        if (args.length == 0 || args[0].equalsIgnoreCase("help") || args[0].equals("?")) {
+            return handleHelp(sender);
         }
 
-        if (args.length == 0) {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "Usage: /tollgate <reload|list|remove>"));
+        if (!sender.hasPermission("tollgate.admin")) {
+            sendMessage(sender, "no-permission");
             return true;
         }
 
@@ -63,8 +62,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
                 return handleRemove(sender);
 
             default:
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "Usage: /tollgate <reload|list|remove>"));
-                return true;
+                return handleHelp(sender);
         }
     }
 
@@ -158,14 +156,37 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     }
 
     /**
+     * Handles /tollgate help or /tollgate ?, displaying usage instructions for all subcommands.
+     */
+    private boolean handleHelp(CommandSender sender) {
+        String sep = "&e==========================================";
+        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', sep));
+        sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
+                "&6创建方法: &f放置铁门，潜行+右键铁门上方的墙贴告示牌"));
+        sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
+                "&f  或在告示牌上写 &e[Tollgate] &f并点击 &e完成"));
+        sender.sendMessage("");
+        sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
+                "&e/tollgate reload &7- 重载 config.yml 和消息配置"));
+        sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
+                "&e/tollgate list   &7- 列出所有已注册的收费站"));
+        sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
+                "&e/tollgate remove &7- 移除正看向的收费站"));
+        sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
+                "&e/tollgate help   &7- 显示此帮助信息"));
+        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', sep));
+        return true;
+    }
+
+    /**
      * Provides tab completion for /tollgate subcommands.
-     * Suggests reload, list, or remove based on partial input.
+     * Suggests reload, list, remove, or help based on partial input.
      */
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (args.length == 1) {
             String prefix = args[0].toLowerCase();
-            return Arrays.asList("reload", "list", "remove").stream()
+            return Arrays.asList("reload", "list", "remove", "help").stream()
                     .filter(s -> s.startsWith(prefix))
                     .collect(Collectors.toList());
         }
