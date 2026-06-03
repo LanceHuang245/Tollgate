@@ -74,7 +74,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         Collection<TollgateData> tollgates = plugin.getTollgateManager().getAllTollgates();
 
         if (tollgates.isEmpty()) {
-            sender.sendMessage("No toll gates registered.");
+            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&c暂无注册的收费站。"));
             return true;
         }
 
@@ -87,14 +87,14 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             if (ownerName == null) {
                 ownerName = data.getOwnerUuid().toString().substring(0, 8);
             }
-            String line = String.format("&e[%d] &f%s &7at &f%s &7- &6%s &7(owner: &f%s&7, earned: &6%s&7)",
+            String line = String.format("&e[%d] &f%s &7位于 &f%s &7- &6%s &7(拥有者: &f%s&7, 收入: &6%s&7)",
                     index, data.getTitle(), location, price, ownerName, revenue);
             sender.sendMessage(ChatColor.translateAlternateColorCodes('&', line));
             index++;
         }
 
         sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
-                "&7Total: " + tollgates.size() + " toll gate(s)"));
+                "&7总计: &f" + tollgates.size() + " &7个收费站"));
         return true;
     }
 
