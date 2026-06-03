@@ -8,12 +8,17 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Tag;
 import org.bukkit.block.Block;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.type.WallSign;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.SignChangeEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.EquipmentSlot;
 
 /**
  * Handles sign-related events for the Tollgate plugin.
@@ -40,7 +45,7 @@ public class SignListener implements Listener {
      *
      * @param event the sign change event
      */
-    @EventHandler(priority = EventPriority.NORMAL)
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     public void onSignChange(SignChangeEvent event) {
         // Verify the first line contains the tollgate identifier "[Tollgate]"
         String line0 = event.getLine(0);
@@ -58,34 +63,119 @@ public class SignListener implements Listener {
             return;
         }
 
-        // Find the block the wall sign is attached to
-        WallSign wallData = (WallSign) event.getBlock().getBlockData();
-        Block attachedBlock = event.getBlock().getRelative(wallData.getFacing().getOppositeFace());
-
-        // Check 1-2 blocks below the attached block for an iron door
-        Block doorBlock = null;
-        for (int dy = -1; dy >= -2; dy--) {
-            Block candidate = attachedBlock.getRelative(0, dy, 0);
-            if (TollgateManager.isIronDoor(candidate)) {
-                doorBlock = candidate;
-                break;
-            }
-        }
-
-        if (doorBlock == null) {
+        // Find the iron door below the sign
+        Location doorBottomLoc = findDoorBelowSign(event.getBlock());
+        if (doorBottomLoc == null) {
             event.getPlayer().sendMessage(ChatColor.translateAlternateColorCodes('&',
                     "&c必须在铁门上方放置告示牌！"));
             return;
         }
-
-        // Normalize to the bottom half of the door
-        Location doorBottomLoc = TollgateManager.getBottomDoorLocation(doorBlock);
 
         // Cancel the sign text change and start chat input flow for toll creation.
         // The sign block stays at its original position where the player placed it.
         event.setCancelled(true);
         plugin.getChatInputHandler().startCreation(event.getPlayer(), doorBottomLoc,
                 event.getBlock().getLocation());
+    }
+
+    /**
+     * Alternative tollgate creation via sneak + right-click on a wall sign above
+     * an iron door. This bypasses SignChangeEvent conflicts with chest lock plugins
+     * that prevent sign text editing.
+     *
+     * @param event the player interact event
+     */
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+    public void onSignInteract(PlayerInteractEvent event) {
+        if (event.getAction() != Action.RIGHT_CLICK_BLOCK) {
+            return;
+        }
+
+        if (event.getHand() != EquipmentSlot.HAND) {
+            return;
+        }
+
+        Block clickedBlock = event.getClickedBlock();
+        if (clickedBlock == null || !Tag.WALL_SIGNS.isTagged(clickedBlock.getType())) {
+            return;
+        }
+
+        if (!event.getPlayer().isSneaking()) {
+            return;
+        }
+
+        Location doorBottomLoc = findDoorBelowSign(clickedBlock);
+        if (doorBottomLoc == null) {
+            return;
+        }
+
+        event.setCancelled(true);
+        plugin.getChatInputHandler().startCreation(event.getPlayer(), doorBottomLoc,
+                clickedBlock.getLocation());
+    }
+
+    /**
+     * Handles sign placement (new sign) above an iron door while sneaking.
+     * Intercepts BlockPlaceEvent to detect when a player places a wall sign
+     * above an iron door and immediately starts the tollgate creation flow,
+     * bypassing SignChangeEvent conflicts with chest lock plugins.
+     *
+     * @param event the block place event
+     */
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+    public void onSignPlace(BlockPlaceEvent event) {
+        Block placedBlock = event.getBlock();
+
+        // Only process wall sign placements
+        if (!Tag.WALL_SIGNS.isTagged(placedBlock.getType())) {
+            return;
+        }
+
+        // Require sneaking for tollgate intent
+        if (!event.getPlayer().isSneaking()) {
+            return;
+        }
+
+        // Verify the placed sign is above an iron door
+        Location doorBottomLoc = findDoorBelowSign(placedBlock);
+        if (doorBottomLoc == null) {
+            return;
+        }
+
+        // Start the tollgate creation flow, sign is already placed
+        event.getPlayer().sendMessage(ChatColor.translateAlternateColorCodes('&',
+                "&a检测到铁门上方贴边放置告示牌，开始创建收费站..."));
+        plugin.getChatInputHandler().startCreation(event.getPlayer(), doorBottomLoc,
+                placedBlock.getLocation());
+    }
+
+    /**
+     * Finds the bottom half location of an iron door below a wall sign.
+     * The sign must be attached to a block that is 1-2 blocks above the door.
+     *
+     * @param signBlock the wall sign block
+     * @return the bottom door location, or null if no iron door found below
+     */
+    private Location findDoorBelowSign(Block signBlock) {
+        BlockData data = signBlock.getBlockData();
+        if (!(data instanceof WallSign)) {
+            return null;
+        }
+        WallSign wallData = (WallSign) data;
+        Block attachedBlock = signBlock.getRelative(wallData.getFacing().getOppositeFace());
+
+        for (int dy = -1; dy >= -2; dy--) {
+            Block candidate = attachedBlock.getRelative(0, dy, 0);
+            if (TollgateManager.isIronDoor(candidate)) {
+                Location doorBottom = TollgateManager.getBottomDoorLocation(candidate);
+                // Sign must be above the top half of the door, not at door height
+                if (signBlock.getY() <= doorBottom.getBlockY() + 1) {
+                    return null;
+                }
+                return doorBottom;
+            }
+        }
+        return null;
     }
 
     /**
