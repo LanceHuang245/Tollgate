@@ -5,9 +5,9 @@ import org.bukkit.util.Vector;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.block.data.Directional;
-import org.bukkit.block.sign.Side;
 import org.bukkit.entity.Player;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.ChatColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -19,7 +19,6 @@ import org.bukkit.Particle;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.claret.tollgate.ConfigManager;
 import org.bukkit.inventory.EquipmentSlot;
-import net.kyori.adventure.text.Component;
 import net.milkbowl.vault.economy.Economy;
 import org.claret.tollgate.TollgatePlugin;
 import org.claret.tollgate.TollgateData;
@@ -230,11 +229,10 @@ public class DoorListener implements Listener {
         Block signBlock = signLoc.getBlock();
         if (signBlock.getChunk().isLoaded() && signBlock.getState() instanceof Sign) {
             Sign sign = (Sign) signBlock.getState();
-            org.bukkit.block.sign.SignSide side = sign.getSide(Side.FRONT);
-            side.line(0, Component.empty());
-            side.line(1, Component.empty());
-            side.line(2, Component.empty());
-            side.line(3, Component.empty());
+            sign.setLine(0, "");
+            sign.setLine(1, "");
+            sign.setLine(2, "");
+            sign.setLine(3, "");
             sign.update();
         }
 

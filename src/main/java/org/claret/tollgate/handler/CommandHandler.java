@@ -1,12 +1,10 @@
 package org.claret.tollgate.handler;
 
-import net.kyori.adventure.text.Component;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Tag;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
-import org.bukkit.block.sign.Side;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -146,11 +144,10 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             // Clear the sign text at the sign location
             Block signBlock = found.getSignLocation().getBlock();
             if (signBlock.getChunk().isLoaded() && signBlock.getState() instanceof Sign sign) {
-                org.bukkit.block.sign.SignSide signSide = sign.getSide(Side.FRONT);
-                signSide.line(0, Component.text(""));
-                signSide.line(1, Component.text(""));
-                signSide.line(2, Component.text(""));
-                signSide.line(3, Component.text(""));
+                sign.setLine(0, "");
+                sign.setLine(1, "");
+                sign.setLine(2, "");
+                sign.setLine(3, "");
                 sign.update();
             }
         } else {

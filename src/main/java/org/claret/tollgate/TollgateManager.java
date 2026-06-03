@@ -1,6 +1,7 @@
 package org.claret.tollgate;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -8,12 +9,8 @@ import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.block.data.Bisected;
 import org.bukkit.block.data.type.WallSign;
-import org.bukkit.block.sign.Side;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextDecoration;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -179,12 +176,10 @@ public class TollgateManager implements Listener {
      * @param data the toll gate data to display
      */
     public void updateSignDisplay(Sign sign, TollgateData data) {
-        // Update sign text with tollgate information using the Component API
-        org.bukkit.block.sign.SignSide side = sign.getSide(Side.FRONT);
-        side.line(0, Component.text("[Tollgate]", NamedTextColor.RED, TextDecoration.BOLD));
-        side.line(1, Component.text(data.getTitle()));
-        side.line(2, Component.text(plugin.getEconomy().format(data.getPrice()), NamedTextColor.YELLOW));
-        side.line(3, Component.text("潜行+右键铁门"));
+        sign.setLine(0, ChatColor.RED.toString() + ChatColor.BOLD + "[Tollgate]");
+        sign.setLine(1, data.getTitle());
+        sign.setLine(2, ChatColor.YELLOW + plugin.getEconomy().format(data.getPrice()));
+        sign.setLine(3, "潜行+右键铁门");
         sign.update();
     }
 
