@@ -1,15 +1,11 @@
-# Currency symbol displayed in messages
-currency-symbol: "$"
-
 # Payment cooldown per tollgate per player (seconds, 0 = disabled)
 cooldown: 3
 
 messages:
-  enter-title: "&a请输入自定义标题"
+  enter-title: "&a请输入自定义标题："
   enter-price: "&a请输入收费价格："
   enter-timeout: "&c收费站创建超时，已取消。"
   tollgate-created: "&a收费站创建成功！标题: &6%title%&a, 价格: &6%price%"
-  tollgate-create-failed: "&c收费站创建失败！价格必须为正数。"
   invalid-price: "&c无效的价格，请输入正数。"
   payment-success: "&a你已支付 &6%price% &a通过收费站。"
   insufficient-funds: "&c你的余额不足！需要 &6%price%&c，你只有 &6%balance%&c。"

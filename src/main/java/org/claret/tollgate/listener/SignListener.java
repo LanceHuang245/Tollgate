@@ -5,7 +5,6 @@ import org.claret.tollgate.TollgateManager;
 import org.claret.tollgate.TollgatePlugin;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.Tag;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;

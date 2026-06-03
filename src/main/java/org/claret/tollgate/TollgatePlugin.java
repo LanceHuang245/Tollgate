@@ -12,9 +12,6 @@ import org.claret.tollgate.listener.DoorListener;
 /** Main plugin class for the Tollgate Paper plugin. */
 public class TollgatePlugin extends JavaPlugin {
 
-    /** Singleton reference to the plugin instance. */
-    private static TollgatePlugin instance;
-
     /** Vault economy provider for handling transactions. */
     private Economy economy;
 
@@ -34,8 +31,6 @@ public class TollgatePlugin extends JavaPlugin {
      */
     @Override
     public void onEnable() {
-        instance = this;
-
         saveDefaultConfig();
 
         configManager = new ConfigManager(this);
@@ -89,15 +84,6 @@ public class TollgatePlugin extends JavaPlugin {
         }
         economy = rsp.getProvider();
         return economy != null;
-    }
-
-    /**
-     * Returns the singleton instance of the plugin.
-     *
-     * @return the TollgatePlugin instance
-     */
-    public static TollgatePlugin getInstance() {
-        return instance;
     }
 
     /**

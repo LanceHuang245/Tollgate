@@ -8,7 +8,6 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.block.data.Bisected;
-import org.bukkit.block.data.type.WallSign;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import java.io.File;
@@ -102,16 +101,6 @@ public class TollgateManager implements Listener {
     }
 
     /**
-     * Returns the total number of registered toll gates.
-     *
-     * @return the count of registered tollgates
-     */
-    public int getTollgateCount() {
-        // Return the number of registered tollgates
-        return tollgates.size();
-    }
-
-    /**
      * Checks whether the given block is an iron door.
      *
      * @param block the block to check
@@ -141,31 +130,6 @@ public class TollgateManager implements Listener {
             }
         }
         return doorBlock.getLocation().clone();
-    }
-
-    /**
-     * Checks whether there is a wall sign attached above the given door block.
-     * The door block must be the bottom half.
-     *
-     * @param doorBlock the bottom half of the iron door
-     * @return true if a wall sign is found 2 blocks above the door, false otherwise
-     */
-    public static boolean isSignAboveDoor(Block doorBlock) {
-        // Check if the block 2 blocks above the door is a wall sign
-        Block blockAbove = doorBlock.getLocation().add(0, 2, 0).getBlock();
-        return blockAbove.getBlockData() instanceof WallSign;
-    }
-
-    /**
-     * Returns the location of the sign above the given door block.
-     * The door block must be the bottom half.
-     *
-     * @param doorBlock the bottom half of the iron door
-     * @return a cloned Location 2 blocks above the door
-     */
-    public static Location getSignLocationAboveDoor(Block doorBlock) {
-        // Return the location 2 blocks above the door
-        return doorBlock.getLocation().add(0, 2, 0).clone();
     }
 
     /**

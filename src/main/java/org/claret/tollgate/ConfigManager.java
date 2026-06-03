@@ -12,7 +12,6 @@ import java.util.Map;
 public class ConfigManager {
 
     private final TollgatePlugin plugin;
-    private String currencySymbol = "$";
     private Map<String, String> messages;
     private boolean particlesEnabled = true;
     private int particleCount = 25;
@@ -37,7 +36,6 @@ public class ConfigManager {
         plugin.reloadConfig();
         FileConfiguration config = plugin.getConfig();
 
-        currencySymbol = config.getString("currency-symbol", "$");
         cooldownSeconds = config.getInt("cooldown", 3);
 
         messages.clear();
@@ -53,15 +51,6 @@ public class ConfigManager {
         particlesEnabled = config.getBoolean("particles.enabled", true);
         particleCount = config.getInt("particles.count", 25);
         particleRadius = config.getDouble("particles.radius", 1.2);
-    }
-
-    /**
-     * Returns the currency symbol configured for display purposes.
-     *
-     * @return the currency symbol string
-     */
-    public String getCurrencySymbol() {
-        return currencySymbol;
     }
 
     /**

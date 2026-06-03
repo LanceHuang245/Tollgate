@@ -109,21 +109,4 @@ public class TollgateData {
         this.totalRevenue += amount;
     }
 
-    /**
-     * Updates the custom title shown on the sign.
-     *
-     * @param title the new title string
-     */
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    /**
-     * Updates the toll price.
-     *
-     * @param price the new price
-     */
-    public void setPrice(double price) {
-        this.price = price;
-    }
 }
