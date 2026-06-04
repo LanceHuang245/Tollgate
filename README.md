@@ -14,11 +14,11 @@ A Minecraft Paper plugin that adds toll gates to your server. Players place an i
 ## Features
 
 - Iron door + sign above = toll gate
-- Sign text sets the price (first line, e.g. `50` or `$50`)
+- Write `[Tollgate]` on the sign to start creation, then enter a custom title and price via chat
+- Players must be within **2 blocks** (horizontal + vertical) of the door to interact
 - Players **sneak + right-click** the iron door to pay and pass through
 - Fee deduction via Vault economy — works with EssentialsX, CMI, or any Vault-based economy
-- Automatic tollgate registration when a valid sign is placed above an iron door
-- Automatic deregistration when the sign or door is broken
+- Automatic tollgate registration upon creation completion, automatic deregistration on break
 - Custom title support via chat input during creation
 - Particle burst effect (END_ROD) on passage, configurable and visible only to the passer
 - Persisted tollgate data survives server restarts, including in multi-world environments
@@ -38,12 +38,16 @@ A Minecraft Paper plugin that adds toll gates to your server. Players place an i
 ### Setting up a toll gate
 
 1. Place an **iron door** block
-2. Place a **sign** on the block **directly above** the iron door
-3. Write a **number** as the price on the sign (first line). Currency symbols are optional and stripped automatically.
+2. Place a **wall sign** on the block **directly above** the iron door
+3. Write `[Tollgate]` on the sign's first line — this starts the creation flow
+4. Type a **custom title** in chat when prompted
+5. Type a **price** in chat when prompted (supports currency symbols like `$50` or plain numbers like `50`)
+
+Type `cancel` at any prompt to abort.
 
 ```
 ┌──────────┐
-│   50     │  ← sign with price
+│[Tollgate]│  ← sign with creation tag
 ├──────────┤
 │ IRON     │  ← iron door (top half)
 │ DOOR     │
@@ -54,20 +58,18 @@ A Minecraft Paper plugin that adds toll gates to your server. Players place an i
 
 ### Using a toll gate
 
-- Hold **Sneak** (Shift) and **right-click** the iron door
-- If you have enough money, the fee is deducted and you are teleported **1 block past the door**
+- Hold **Sneak** (Shift) and **right-click** the iron door **from within 2 blocks**
+- If you have enough money, the fee is deducted and you are teleported past the door
 - If you don't have enough, you'll see an "insufficient funds" message
+- A 3-second cooldown prevents rapid reuse per tollgate
 
 ## Configuration
 
 `plugins/Tollgate/config.yml`:
 
 ```yaml
-# Currency symbol displayed in messages
-currency-symbol: "$"
-
-# Payment cooldown per player (seconds, 0 = disabled)
-cooldown: 0
+# Payment cooldown per tollgate per player (seconds, 0 = disabled)
+cooldown: 3
 
 # Particle effects when a player passes through a tollgate (visible to the passing player only)
 particles:
@@ -76,12 +78,23 @@ particles:
   radius: 1.2
 
 messages:
+  enter-title: "&aPlease enter a custom title:"
+  enter-price: "&aPlease enter the price:"
+  enter-timeout: "&cTollgate creation timed out. Cancelled."
+  tollgate-created: "&aTollgate created! Title: &6%title%&a, Price: &6%price%"
+  tollgate-create-failed: "&cTollgate creation failed! Price must be positive."
+  invalid-price: "&cInvalid price. Please enter a positive number."
   payment-success: "&aYou paid &6%price% &ato pass through the toll gate."
   insufficient-funds: "&cYou don't have enough money! Need &6%price%&c, you have &6%balance%&c."
   cooldown: "&cPlease wait &6%seconds% &cseconds before using this gate again."
-  tollgate-created: "&aToll gate created with price &6%price%"
   tollgate-removed: "&cToll gate removed."
+  tollgate-not-found: "&cNo toll gate found here."
+  no-permission: "&cYou don't have permission to use this command."
   plugin-reloaded: "&aTollgate config reloaded."
+  title-cancelled: "&cTollgate creation cancelled."
+  payment-received: "&a%player% &7passed your tollgate &6%title%&7. You received &6%price%&7. Total: &6%revenue%"
+  tollgate-invalid-door: "&cThe iron door was removed. Creation cancelled."
+  tollgate-invalid-sign: "&cThe sign was removed. Creation cancelled."
 ```
 
 ### Placeholders
@@ -91,6 +104,9 @@ messages:
 | `%price%` | The toll fee formatted with currency symbol |
 | `%balance%` | The player's current balance after payment |
 | `%seconds%` | Remaining cooldown seconds |
+| `%title%` | The custom title of the tollgate |
+| `%player%` | The name of the player who passed through |
+| `%revenue%` | The tollgate's total lifetime revenue |
 
 ## Commands
 
@@ -132,8 +148,13 @@ Key Vault methods used:
 ### Toll Gate Validation
 
 A sign is recognized as a toll gate when:
-1. It is placed on the block **directly above** an iron door
-2. Its first line contains a valid number (positive, with or without `$`/`¢`/`€`/`¥` prefix)
+1. It is a **wall sign** placed on the block **directly above** an iron door
+2. Its first line is exactly `[Tollgate]`
+3. The sign text triggers a chat input flow: the player types a title, then a price (positive number, with or without `$`/`¢`/`€`/`¥` prefix)
+
+### Interaction Limits
+
+Players must be within 2 blocks of the door horizontally and vertically to interact. Interactions beyond this range are silently ignored to prevent accidental remote triggering.
 
 ## Building from Source
 
