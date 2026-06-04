@@ -6,8 +6,8 @@
 
 ## 运行要求
 
-- **Paper 26.1.x**
-- **Java 25+**
+- **Paper 1.20.6+**
+- **Java 21+**
 - **Vault** 插件
 - 任意 Vault 兼容的经济插件（推荐 [EssentialsX](https://essentialsx.net/)）
 
@@ -171,7 +171,7 @@ mvn clean package
 <dependency>
     <groupId>io.papermc.paper</groupId>
     <artifactId>paper-api</artifactId>
-    <version>26.1.2</version>
+    <version>1.20.6-R0.1-SNAPSHOT</version>
     <scope>provided</scope>
 </dependency>
 <dependency>

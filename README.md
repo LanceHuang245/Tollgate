@@ -6,8 +6,8 @@ A Minecraft Paper plugin that adds toll gates to your server. Players place an i
 
 ## Requirements
 
-- **Paper 26.1.x**
-- **Java 25+**
+- **Paper 1.20.6+**
+- **Java 21+**
 - **Vault** plugin
 - A Vault-compatible economy plugin (e.g. [EssentialsX](https://essentialsx.net/))
 
@@ -172,7 +172,7 @@ The compiled `.jar` will be in `target/`.
 <dependency>
     <groupId>io.papermc.paper</groupId>
     <artifactId>paper-api</artifactId>
-    <version>26.1.2</version>
+    <version>1.20.6-R0.1-SNAPSHOT</version>
     <scope>provided</scope>
 </dependency>
 <dependency>
